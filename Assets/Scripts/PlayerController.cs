@@ -21,11 +21,22 @@ public class PlayerController : MonoBehaviour
     [Header("Knockback Settings")]
     public float knockbackResistance = 1f; // 1 = normal, <1 = less knockback
 
+    [Header("Particle Effects")]
+    public ParticleSystem dustTrailPS; // Assign your dust trail particle system here
+    public float dustSpeedThreshold = 0.1f; // Minimum speed to start dust trail
+
+    private bool isDustPlaying = false;
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
         animator = GetComponent<Animator>(); // Assuming Animator is on child
+        
+        // If dustTrailPS is not assigned, try to find it on child objects
+        if (dustTrailPS == null)
+        {
+            dustTrailPS = GetComponentInChildren<ParticleSystem>();
+        }
     }
 
     void FixedUpdate()
@@ -51,7 +62,8 @@ public class PlayerController : MonoBehaviour
             transform.rotation = Quaternion.Slerp(transform.rotation, yOnlyRotation, rotationSpeed * Time.deltaTime);
         }
 
-
+        // Handle dust trail particle system
+        HandleDustTrail(isMovingInput);
 
         // Animate
         bool isMoving = inputDirection.magnitude > 0.1f;
@@ -61,6 +73,26 @@ public class PlayerController : MonoBehaviour
             animator.SetBool("Push", isMoving); // Adjust if you use a separate push key
         }
     }
+
+    void HandleDustTrail(bool isMovingInput)
+    {
+        if (dustTrailPS == null) return;
+
+        // Check if player is moving (either has input or has velocity)
+        bool shouldPlayDust = isMovingInput || rb.linearVelocity.magnitude > dustSpeedThreshold;
+
+        if (shouldPlayDust && !isDustPlaying)
+        {
+            dustTrailPS.Play();
+            isDustPlaying = true;
+        }
+        else if (!shouldPlayDust && isDustPlaying)
+        {
+            dustTrailPS.Stop();
+            isDustPlaying = false;
+        }
+    }
+
     public IEnumerator ActivateGiantMode(float duration)
     {
         Vector3 originalScale = Vector3.one * 3.5f;
@@ -83,6 +115,7 @@ public class PlayerController : MonoBehaviour
         pushForce = originalPushForce;
         knockbackResistance = 1f;
     }
+    
     public void ApplyFlyingKnockback(Vector3 direction, float force, float upwardAmount = 0.5f)
     {
         Vector3 launchDir = (direction.normalized + Vector3.up * upwardAmount).normalized;
@@ -90,7 +123,4 @@ public class PlayerController : MonoBehaviour
         rb.linearVelocity = Vector3.zero; // Reset velocity for consistency
         rb.AddForce(launchDir * force, ForceMode.Impulse);
     }
-
-
-
 }
