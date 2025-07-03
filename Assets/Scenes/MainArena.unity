@@ -571,6 +571,7 @@ GameObject:
   - component: {fileID: 1296567677}
   - component: {fileID: 1296567676}
   - component: {fileID: 1296567675}
+  - component: {fileID: 1296567679}
   m_Layer: 0
   m_Name: IceArena
   m_TagString: Untagged
@@ -667,6 +668,25 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1296567679
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1296567674}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b53010e130fd52d4d8e893e907233dd4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  powerupPrefabs:
+  - {fileID: 6066082120592255210, guid: b19ac82b041c9ca44917f9ad9e2d58bf, type: 3}
+  arenaWidth: 10
+  arenaLength: 10
+  delayBetweenSpawns: 7
+  arenaFloor: {fileID: 1296567678}
+  yOffset: 1
 --- !u!1 &1696439420
 GameObject:
   m_ObjectHideFlags: 0
@@ -889,7 +909,7 @@ Transform:
   m_GameObject: {fileID: 1992783441}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -7.7, z: 0}
+  m_LocalPosition: {x: 0, y: -16.2, z: 0}
   m_LocalScale: {x: 76.94, y: 0.3, z: 131.2}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1054,6 +1074,9 @@ MonoBehaviour:
   maxSpeed: 5
   friction: 0.98
   rotationSpeed: 10
+  originalPushForce: 10
+  pushForce: 10
+  knockbackResistance: 1
 --- !u!114 &2100918962
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1066,7 +1089,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5e63575b0ff0a845b7c7b83cce8f137, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pushForce: 10
+  basePushForce: 10
+  upwardLift: 0.5
+  pushCooldown: 0.5
 --- !u!114 &2100918963
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1235,7 +1260,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5e63575b0ff0a845b7c7b83cce8f137, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pushForce: 10
+  basePushForce: 10
+  upwardLift: 0.5
+  pushCooldown: 0.5
 --- !u!114 &919132147905180046
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1254,6 +1281,9 @@ MonoBehaviour:
   maxSpeed: 5
   friction: 0.98
   rotationSpeed: 3
+  originalPushForce: 10
+  pushForce: 10
+  knockbackResistance: 1
 --- !u!114 &919132147905180047
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1300,7 +1330,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5e63575b0ff0a845b7c7b83cce8f137, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pushForce: 10
+  basePushForce: 10
+  upwardLift: 0.5
+  pushCooldown: 0.5
 --- !u!114 &919132148392286694
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1319,6 +1351,9 @@ MonoBehaviour:
   maxSpeed: 5
   friction: 0.98
   rotationSpeed: 3
+  originalPushForce: 10
+  pushForce: 10
+  knockbackResistance: 1
 --- !u!136 &919132148392286695
 CapsuleCollider:
   m_ObjectHideFlags: 0
