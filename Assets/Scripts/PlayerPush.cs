@@ -7,14 +7,22 @@ public class PlayerPush : MonoBehaviour
     public float pushCooldown = 0.5f;
 
     private float lastPushTime;
+    private bool isInvulnerable = false;
 
     private void OnCollisionEnter(Collision collision)
     {
+        // Don't push if invulnerable
+        if (isInvulnerable) return;
+
         // Check if other object is a player and not self
         if (collision.gameObject.CompareTag("Player") && Time.time > lastPushTime + pushCooldown)
         {
             Rigidbody otherRb = collision.gameObject.GetComponent<Rigidbody>();
             PlayerController otherPlayer = collision.gameObject.GetComponent<PlayerController>();
+            PlayerPush otherPush = collision.gameObject.GetComponent<PlayerPush>();
+
+            // Don't push if the other player is invulnerable
+            if (otherPush != null && otherPush.IsInvulnerable()) return;
 
             if (otherRb != null && otherPlayer != null)
             {
@@ -32,5 +40,15 @@ public class PlayerPush : MonoBehaviour
                 lastPushTime = Time.time;
             }
         }
+    }
+
+    public void SetInvulnerable(bool invulnerable)
+    {
+        isInvulnerable = invulnerable;
+    }
+
+    public bool IsInvulnerable()
+    {
+        return isInvulnerable;
     }
 }

@@ -19,13 +19,12 @@ public class PlayerController : MonoBehaviour
     public float pushForce = 10f;
 
     [Header("Knockback Settings")]
-    public float knockbackResistance = 1f; // 1 = normal, <1 = less knockback
-
+    public float knockbackResistance = 1f;
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
-        animator = GetComponent<Animator>(); // Assuming Animator is on child
+        animator = GetComponent<Animator>();
     }
 
     void FixedUpdate()
@@ -51,16 +50,37 @@ public class PlayerController : MonoBehaviour
             transform.rotation = Quaternion.Slerp(transform.rotation, yOnlyRotation, rotationSpeed * Time.deltaTime);
         }
 
-
-
         // Animate
         bool isMoving = inputDirection.magnitude > 0.1f;
         if (animator != null)
         {
             animator.SetBool("Walk", isMoving);
-            animator.SetBool("Push", isMoving); // Adjust if you use a separate push key
+            animator.SetBool("Push", isMoving);
         }
     }
+
+    public void ResetPlayerState()
+    {
+        // Reset scale to normal
+        transform.localScale = Vector3.one * 3.5f;
+
+        // Reset powerup values
+        pushForce = originalPushForce;
+        knockbackResistance = 1f;
+
+        // Stop any ongoing tweens
+        transform.DOKill();
+
+        // Reset physics
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+        }
+
+        Debug.Log($"{gameObject.name} state reset for respawn");
+    }
+
     public IEnumerator ActivateGiantMode(float duration)
     {
         Vector3 originalScale = Vector3.one * 3.5f;
@@ -83,14 +103,12 @@ public class PlayerController : MonoBehaviour
         pushForce = originalPushForce;
         knockbackResistance = 1f;
     }
+
     public void ApplyFlyingKnockback(Vector3 direction, float force, float upwardAmount = 0.5f)
     {
         Vector3 launchDir = (direction.normalized + Vector3.up * upwardAmount).normalized;
 
-        rb.linearVelocity = Vector3.zero; // Reset velocity for consistency
+        rb.linearVelocity = Vector3.zero;
         rb.AddForce(launchDir * force, ForceMode.Impulse);
     }
-
-
-
 }

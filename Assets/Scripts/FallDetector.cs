@@ -6,9 +6,18 @@ public class FallDetector : MonoBehaviour
     {
         if (other.CompareTag("DeathZone"))
         {
-            Destroy(gameObject);
             Debug.Log($"{gameObject.name} fell!");
-            // Call a GameManager here if you want to declare the winner
+
+            // Notify GameManager instead of destroying immediately
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.PlayerFell(gameObject);
+            }
+            else
+            {
+                // Fallback if no GameManager
+                Destroy(gameObject);
+            }
         }
     }
 }
