@@ -19,6 +19,15 @@ public class PlayerController : MonoBehaviour
     public float moveForce = 10f;
     public float maxSpeed = 5f;
     public float friction = 0.98f;
+
+
+
+
+
+
+
+
+
     public float rotationSpeed = 10f;
 
     private Rigidbody rb;

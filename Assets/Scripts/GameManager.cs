@@ -10,12 +10,12 @@ public class GameManager : MonoBehaviour
     [Header("Manual Player Assignment")]
     public GameObject player1GameObject;
     public GameObject player2GameObject;
-    
+
     [Header("Round System")]
     public int maxRounds = 5; // Best of 5
     public float roundEndDelay = 3f; // Delay before next round
     public float gameEndDelay = 5f; // Delay before game restart
-    
+
     [Header("Respawn Settings")]
     public float respawnDelay = 2f;
     public float respawnInvulnerabilityTime = 1f;
@@ -42,6 +42,7 @@ public class GameManager : MonoBehaviour
     private List<GameObject> alivePlayers = new List<GameObject>();
     private Dictionary<GameObject, Vector3> playerOriginalSpawns = new Dictionary<GameObject, Vector3>();
     private Dictionary<GameObject, int> playerNumbers = new Dictionary<GameObject, int>();
+    private List<GameObject> allRegisteredPlayers = new List<GameObject>(); // Keep track of all players
 
     void Awake()
     {
@@ -65,16 +66,17 @@ public class GameManager : MonoBehaviour
 
     void RegisterPlayers()
     {
+        // Clear existing data
+        alivePlayers.Clear();
+        playerNumbers.Clear();
+        playerOriginalSpawns.Clear();
+        allRegisteredPlayers.Clear();
+
         // Use manual assignment if available
         if (player1GameObject != null && player2GameObject != null)
         {
-            // Clear existing data
-            alivePlayers.Clear();
-            playerNumbers.Clear();
-            playerOriginalSpawns.Clear();
-
             // Register Player 1
-            alivePlayers.Add(player1GameObject);
+            allRegisteredPlayers.Add(player1GameObject);
             playerNumbers[player1GameObject] = 1;
             if (spawnPoints != null && spawnPoints.Length > 0)
             {
@@ -86,7 +88,7 @@ public class GameManager : MonoBehaviour
             }
 
             // Register Player 2
-            alivePlayers.Add(player2GameObject);
+            allRegisteredPlayers.Add(player2GameObject);
             playerNumbers[player2GameObject] = 2;
             if (spawnPoints != null && spawnPoints.Length > 1)
             {
@@ -108,7 +110,7 @@ public class GameManager : MonoBehaviour
             for (int i = 0; i < players.Length; i++)
             {
                 GameObject player = players[i];
-                alivePlayers.Add(player);
+                allRegisteredPlayers.Add(player);
 
                 // Try to extract player number from name first
                 int playerNumber = ExtractPlayerNumberFromName(player.name);
@@ -150,13 +152,13 @@ public class GameManager : MonoBehaviour
                     numberPart += name[i];
                 }
             }
-            
+
             if (int.TryParse(numberPart, out int number))
             {
                 return number;
             }
         }
-        
+
         return -1; // Return -1 if no number found
     }
 
@@ -165,22 +167,28 @@ public class GameManager : MonoBehaviour
         if (!gameInProgress) return;
 
         roundInProgress = true;
-        
-        // Reset all players to spawn positions
-        foreach (GameObject player in playerNumbers.Keys)
+
+        // Reset all registered players to spawn positions
+        foreach (GameObject player in allRegisteredPlayers)
         {
-            ResetPlayerForRound(player);
+            if (player != null) // Safety check
+            {
+                ResetPlayerForRound(player);
+            }
         }
 
-        // Rebuild alive players list
+        // Rebuild alive players list from all registered players
         alivePlayers.Clear();
-        foreach (GameObject player in playerNumbers.Keys)
+        foreach (GameObject player in allRegisteredPlayers)
         {
-            alivePlayers.Add(player);
+            if (player != null) // Safety check
+            {
+                alivePlayers.Add(player);
+            }
         }
 
-        Debug.Log($"Round {currentRound} started!");
-        
+        Debug.Log($"Round {currentRound} started with {alivePlayers.Count} players!");
+
         // Hide any UI panels
         if (roundWinUI != null) roundWinUI.SetActive(false);
         if (gameWinUI != null) gameWinUI.SetActive(false);
@@ -229,7 +237,7 @@ public class GameManager : MonoBehaviour
     void EndRound()
     {
         if (!roundInProgress) return;
-        
+
         roundInProgress = false;
         GameObject winner = null;
 
@@ -241,8 +249,9 @@ public class GameManager : MonoBehaviour
         }
         else if (alivePlayers.Count == 0)
         {
-            Debug.Log("Round ended in a draw!");
-            // In case of draw, restart the same round
+            Debug.Log("Round ended in a draw - both players fell!");
+            // In case of draw, show draw UI and restart the same round
+            ShowDrawUI();
             StartCoroutine(RestartRoundAfterDelay());
             return;
         }
@@ -251,7 +260,7 @@ public class GameManager : MonoBehaviour
         {
             int winnerNumber = playerNumbers[winner];
             Debug.Log($"Winner {winner.name} is assigned number: {winnerNumber}");
-            
+
             // Award point to winner
             if (winnerNumber == 1)
             {
@@ -263,13 +272,13 @@ public class GameManager : MonoBehaviour
             }
 
             Debug.Log($"Player {winnerNumber} wins round {currentRound}!");
-            
+
             // Show round win UI
             ShowRoundWinUI(winnerNumber);
-            
+
             // Update score display
             UpdateScoreUI();
-            
+
             // Check if game is over
             if (IsGameOver())
             {
@@ -291,6 +300,15 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    void ShowDrawUI()
+    {
+        if (roundWinUI != null && roundWinText != null)
+        {
+            roundWinUI.SetActive(true);
+            roundWinText.text = $"Round {currentRound} Draw!\nBoth players fell!";
+        }
+    }
+
     void UpdateScoreUI()
     {
         if (scoreText != null)
@@ -302,7 +320,7 @@ public class GameManager : MonoBehaviour
     IEnumerator StartNextRoundAfterDelay()
     {
         yield return new WaitForSeconds(roundEndDelay);
-        
+
         currentRound++;
         StartNewRound();
     }
@@ -310,7 +328,7 @@ public class GameManager : MonoBehaviour
     IEnumerator RestartRoundAfterDelay()
     {
         yield return new WaitForSeconds(roundEndDelay);
-        StartNewRound();
+        StartNewRound(); // This will now properly respawn both players
     }
 
     bool IsGameOver()
@@ -323,9 +341,9 @@ public class GameManager : MonoBehaviour
     {
         gameInProgress = false;
         int gameWinner = player1Wins > player2Wins ? 1 : 2;
-        
+
         Debug.Log($"Game Over! Player {gameWinner} wins the match!");
-        
+
         // Show game win UI
         if (gameWinUI != null && gameWinText != null)
         {
@@ -333,10 +351,10 @@ public class GameManager : MonoBehaviour
             gameWinText.text = $"Player {gameWinner} Wins the Match!\n" +
                               $"Final Score: {player1Wins} - {player2Wins}";
         }
-        
+
         // Hide round win UI
         if (roundWinUI != null) roundWinUI.SetActive(false);
-        
+
         StartCoroutine(RestartGameAfterDelay());
     }
 
@@ -353,15 +371,15 @@ public class GameManager : MonoBehaviour
         player1Wins = 0;
         player2Wins = 0;
         gameInProgress = true;
-        
+
         // Hide UI
         if (roundWinUI != null) roundWinUI.SetActive(false);
         if (gameWinUI != null) gameWinUI.SetActive(false);
-        
+
         // Start fresh
         StartNewRound();
         UpdateScoreUI();
-        
+
         Debug.Log("Game restarted!");
     }
 
@@ -476,7 +494,7 @@ public class GameManager : MonoBehaviour
     public int GetPlayer2Wins() => player2Wins;
     public bool IsRoundInProgress() => roundInProgress;
     public int GetAlivePlayerCount() => alivePlayers.Count;
-    
+
     // Manual restart method (can be called from UI button)
     public void ManualRestartGame()
     {
