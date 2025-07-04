@@ -1,11 +1,21 @@
 using UnityEngine;
 using DG.Tweening;
 using System.Collections;
+
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerController : MonoBehaviour
 {
+    [Header("Player Settings")]
+    public int playerNumber = 1; // 1 for Player 1, 2 for Player 2
+
+    [Header("PC Input Settings")]
     public string horizontalInput = "Horizontal";
     public string verticalInput = "Vertical";
+
+    [Header("Mobile Controls")]
+    public FixedJoystick mobileJoystick; // Assign specific joystick for this player
+    public GameObject MobileInput;
+    [Header("Movement Settings")]
     public float moveForce = 10f;
     public float maxSpeed = 5f;
     public float friction = 0.98f;
@@ -13,6 +23,7 @@ public class PlayerController : MonoBehaviour
 
     private Rigidbody rb;
     private Animator animator;
+    public bool isMobile;
 
     [Header("Powerup Settings")]
     public float originalPushForce = 10f;
@@ -25,14 +36,18 @@ public class PlayerController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
         animator = GetComponent<Animator>();
+        // Setup input strings for PC based on player number
+        if (!isMobile)
+        {
+            SetupPCControls();
+            MobileInput.SetActive(false );
+        }
     }
 
     void FixedUpdate()
     {
-        // Get input
-        float h = Input.GetAxis(horizontalInput);
-        float v = Input.GetAxis(verticalInput);
-        Vector3 inputDirection = new Vector3(h, 0f, v);
+        // Get input from appropriate source
+        Vector3 inputDirection = GetInputDirection();
         bool isMovingInput = inputDirection.magnitude > 0.1f;
 
         // Apply force
@@ -56,6 +71,41 @@ public class PlayerController : MonoBehaviour
         {
             animator.SetBool("Walk", isMoving);
             animator.SetBool("Push", isMoving);
+        }
+    }
+
+    private void SetupPCControls()
+    {
+        // Setup input axes based on player number
+        if (playerNumber == 1)
+        {
+            // Player 1 uses WASD
+            horizontalInput = "Horizontal"; // A/D keys
+            verticalInput = "Vertical";     // W/S keys
+        }
+        else if (playerNumber == 2)
+        {
+            // Player 2 uses Arrow Keys
+            horizontalInput = "HorizontalP2"; // Left/Right arrows
+            verticalInput = "VerticalP2";     // Up/Down arrows
+        }
+    }
+
+    private Vector3 GetInputDirection()
+    {
+        if (isMobile && mobileJoystick != null)
+        {
+            // Get input from mobile joystick
+            float h = mobileJoystick.Horizontal;
+            float v = mobileJoystick.Vertical;
+            return new Vector3(h, 0f, v);
+        }
+        else
+        {
+            // Get input from PC keyboard
+            float h = Input.GetAxis(horizontalInput);
+            float v = Input.GetAxis(verticalInput);
+            return new Vector3(h, 0f, v);
         }
     }
 
