@@ -1244,7 +1244,7 @@ GameObject:
   - component: {fileID: 1296567676}
   - component: {fileID: 1296567675}
   - component: {fileID: 1296567679}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: IceArena
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1793,6 +1793,11 @@ MonoBehaviour:
   basePushForce: 10
   upwardLift: 0.5
   pushCooldown: 0.5
+  shockwaveParticleSystemPrefab: {fileID: 9080140021571130472, guid: 82066d902ed0dd6488ddfd32eb994801, type: 3}
+  shockwaveGroundOffset: 0.1
+  groundLayerMask:
+    serializedVersion: 2
+    m_Bits: 8
 --- !u!114 &919132147905180046
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1814,7 +1819,7 @@ MonoBehaviour:
   maxSpeed: 5
   friction: 0.98
   rotationSpeed: 3
-  isMobile: 1
+  isMobile: 0
   originalPushForce: 10
   pushForce: 10
   knockbackResistance: 1
@@ -1867,6 +1872,11 @@ MonoBehaviour:
   basePushForce: 10
   upwardLift: 0.5
   pushCooldown: 0.5
+  shockwaveParticleSystemPrefab: {fileID: 9080140021571130472, guid: 82066d902ed0dd6488ddfd32eb994801, type: 3}
+  shockwaveGroundOffset: 0.1
+  groundLayerMask:
+    serializedVersion: 2
+    m_Bits: 8
 --- !u!114 &919132148392286694
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1888,7 +1898,7 @@ MonoBehaviour:
   maxSpeed: 5
   friction: 0.98
   rotationSpeed: 3
-  isMobile: 1
+  isMobile: 0
   originalPushForce: 10
   pushForce: 10
   knockbackResistance: 1
